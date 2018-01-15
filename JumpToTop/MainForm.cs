@@ -188,6 +188,7 @@ namespace JumpToTop
             ret = p.StandardOutput.ReadToEnd();
 
 
+
             //using (var p = new Process())
             //{
             //    p.StartInfo.FileName = adbPath;
