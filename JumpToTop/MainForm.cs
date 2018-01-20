@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -69,7 +68,7 @@ namespace JumpToTop
         {
             if (m.Msg == 0x219)
             {
-                Debug.WriteLine("WParam：{0} ,LParam:{1},Msg：{2}，Result：{3}", m.WParam, m.LParam, m.Msg, m.Result);
+                LogHelper.Debug(string.Format("WParam：{0} ,LParam:{1},Msg：{2}，Result：{3}", m.WParam, m.LParam, m.Msg, m.Result));
                 if (m.WParam.ToInt32() == 7) //设备插入或拔出
                 {
                     CheckHasAndroidModel();
@@ -82,6 +81,8 @@ namespace JumpToTop
             }
             catch (Exception ex)
             {
+                LogHelper.Error(ex.Message);
+
                 toolStripStatusLabel2.Text = "未检测到设备";
             }
         }
@@ -91,16 +92,12 @@ namespace JumpToTop
         #region event
 
         private void btnSearch_Click(object sender, EventArgs e)
-        {
-            LogHelper.Debug("123");
-
-            DateTime start = DateTime.Now;
-
+        {         
             SaveAndroidScreenToDisk();
 
             Bitmap map = GetPart(tempFileName, 0, 0, 1080, (int)(1920 * (5.5 - 3) / 16.5), 0, (int)(1920 * 3 / 16.5));
 
-            string fileName = Path.Combine(Application.StartupPath, "temp", "test", Guid.NewGuid() + ".png");
+            string fileName = Path.Combine(Application.StartupPath, "temp",  Guid.NewGuid() + ".png");
 
             map.Save(fileName);
 
@@ -115,12 +112,6 @@ namespace JumpToTop
 
                 File.Delete(fileName);
             }
-
-            DateTime end = DateTime.Now;
-
-            TimeSpan span = end - start;
-            Console.WriteLine("this cost time {0} ms", span.TotalMilliseconds);
-
         }
 
 
@@ -134,7 +125,7 @@ namespace JumpToTop
         private void CheckHasAndroidModel()
         {
             var text = ExcuteAdbCmd("shell getprop ro.product.model", false); //获取手机型号
-            Debug.WriteLine("检查设备：" + text + "  T=" + DateTime.Now);
+            LogHelper.Debug(string.Format("检查设备：{0}" , text));
             if (text.Contains("no devices") || string.IsNullOrWhiteSpace(text))
             {
                 hasAndroid = false;
@@ -189,9 +180,16 @@ namespace JumpToTop
         {
             tempFileName = Guid.NewGuid() + ".png";
 
+            //DateTime start = DateTime.Now;
+
             ExcuteAdbCmd("shell screencap -p /sdcard/" + tempFileName);
 
-            ExcuteAdbCmd("pull /sdcard/" + tempFileName);
+            //DateTime end = DateTime.Now;
+
+            //TimeSpan span = end - start;
+            //Console.WriteLine("screencap cost time {0} ms", span.TotalMilliseconds);
+
+            ExcuteAdbCmd("pull /sdcard/"+ tempFileName);
 
             ExcuteAdbCmd("shell rm /sdcard/" + tempFileName);
             if (File.Exists(tempFileName))
@@ -245,17 +243,20 @@ namespace JumpToTop
         /// <param name="pOrigStartPointY">原始图片开始截取处的坐标Y值</param>
         private Bitmap GetPart(string pPath, int pPartStartPointX, int pPartStartPointY, int pPartWidth, int pPartHeight, int pOrigStartPointX, int pOrigStartPointY)
         {
-            Image originalImg = Image.FromFile(pPath);
+            Bitmap partImg = new Bitmap(1, 1);
 
-            Bitmap partImg = new Bitmap(pPartWidth, pPartHeight);
-            Graphics graphics = Graphics.FromImage(partImg);
-            Rectangle destRect = new Rectangle(new Point(pPartStartPointX, pPartStartPointY),
-                new Size(pPartWidth, pPartHeight));//目标位置
-            Rectangle origRect = new Rectangle(new Point(pOrigStartPointX, pOrigStartPointY),
-                new Size(pPartWidth, pPartHeight));//原图位置（默认从原图中截取的图片大小等于目标图片的大小）
+            if (File.Exists(pPath))
+            {
+                Image originalImg = Image.FromFile(pPath);
 
-            graphics.DrawImage(originalImg, destRect, origRect, GraphicsUnit.Pixel);
-
+                partImg = new Bitmap(pPartWidth, pPartHeight);
+                Graphics graphics = Graphics.FromImage(partImg);
+                Rectangle destRect = new Rectangle(new Point(pPartStartPointX, pPartStartPointY),
+                    new Size(pPartWidth, pPartHeight));//目标位置
+                Rectangle origRect = new Rectangle(new Point(pOrigStartPointX, pOrigStartPointY),
+                    new Size(pPartWidth, pPartHeight));//原图位置（默认从原图中截取的图片大小等于目标图片的大小）
+                graphics.DrawImage(originalImg, destRect, origRect, GraphicsUnit.Pixel);
+            }          
             return partImg;
         }
 

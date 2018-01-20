@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JumpToTop.utils;
+using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Tesseract;
@@ -32,8 +33,8 @@ namespace JumpToTop
             }
             catch (Exception ex)
             {
+                LogHelper.Error(ex.Message);
             }
-
             
             return result;
         }

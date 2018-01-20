@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace JumpToTop.utils
 {
@@ -13,7 +12,7 @@ namespace JumpToTop.utils
         
         static LogHelper()
         {
-            _logger = LogManager.GetLogger("LogToFile");
+            _logger = LogManager.GetLogger("LogToFile");            
         }
 
         public static void Debug(string message)
