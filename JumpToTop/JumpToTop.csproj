@@ -73,6 +73,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="adb\mke2fs.conf" />
+    <None Include="adb\source.properties" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -120,7 +122,15 @@
     <Content Include="adb\adb.exe" />
     <Content Include="adb\AdbWinApi.dll" />
     <Content Include="adb\AdbWinUsbApi.dll" />
+    <Content Include="adb\dmtracedump.exe" />
+    <Content Include="adb\etc1tool.exe" />
     <Content Include="adb\fastboot.exe" />
+    <Content Include="adb\hprof-conv.exe" />
+    <Content Include="adb\libwinpthread-1.dll" />
+    <Content Include="adb\make_f2fs.exe" />
+    <Content Include="adb\mke2fs.exe" />
+    <Content Include="adb\NOTICE.txt" />
+    <Content Include="adb\sqlite3.exe" />
     <Content Include="dll\AspriseOCR.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
