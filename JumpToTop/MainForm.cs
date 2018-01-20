@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using Microsoft.Win32;
 using Timer = System.Timers.Timer;
 using JumpToTop.utils;
 
@@ -13,10 +12,9 @@ namespace JumpToTop
     {
         #region private filed
 
+        private const string picName = "65AFC37E-F595-4351-941C-1B1BFF35E2D8.png";
         private readonly string adbPath = Application.StartupPath + @"\adb\adb.exe";
-        private string browserPath = string.Empty;
         private string picDir = Application.StartupPath + "\\temp";
-        private string tempFileName = string.Empty;
         /// <summary>
         ///     是否存在安卓
         /// </summary>
@@ -42,7 +40,6 @@ namespace JumpToTop
         public MainForm()
         {
             InitializeComponent();
-            InitBrowser();
         }
 
         #endregion     
@@ -81,7 +78,7 @@ namespace JumpToTop
             }
             catch (Exception ex)
             {
-                LogHelper.Error(ex.Message);
+                LogHelper.Error("MainForm.WndProc:" + ex.Message);
 
                 toolStripStatusLabel2.Text = "未检测到设备";
             }
@@ -92,12 +89,29 @@ namespace JumpToTop
         #region event
 
         private void btnSearch_Click(object sender, EventArgs e)
-        {         
+        {      
+            try
+            {
+                DoSearch();
+            }
+            catch(Exception ex)
+            {
+                LogHelper.Error("MainForm.btnSearch_Click:" + ex.Message);
+            }
+        }
+
+
+        #endregion
+
+        #region private method
+
+        private void DoSearch()
+        {
             SaveAndroidScreenToDisk();
 
-            Bitmap map = GetPart(tempFileName, 0, 0, 1080, (int)(1920 * (5.5 - 3) / 16.5), 0, (int)(1920 * 3 / 16.5));
+            Bitmap map = CreatPicturePart(picName, 0, 0, 1080, (int)(1920 * (5.5 - 3) / 16.5), 0, (int)(1920 * 3 / 16.5));
 
-            string fileName = Path.Combine(Application.StartupPath, "temp",  Guid.NewGuid() + ".png");
+            string fileName = Path.Combine(Application.StartupPath, "temp", Guid.NewGuid() + ".png");
 
             map.Save(fileName);
 
@@ -107,17 +121,15 @@ namespace JumpToTop
                 searchContent = RemoveSpecialChar(searchContent);
                 if (!string.IsNullOrEmpty(searchContent))
                 {
-                    Search(searchContent);
+                    SearchByBrowser(searchContent);
                 }
-
+                if (File.Exists(picName))
+                {
+                    File.Delete(picName);
+                }
                 File.Delete(fileName);
             }
         }
-
-
-        #endregion
-
-        #region private method
 
         /// <summary>
         ///     检测是否存在手机
@@ -138,11 +150,7 @@ namespace JumpToTop
                 hasAndroid = true;
                 btnSearch.Enabled = true;
                 isStop = false;
-                toolStripStatusLabel2.Text = text.Trim();
-                if (!backgroundWorker1.IsBusy)
-                {
-                    backgroundWorker1.RunWorkerAsync();
-                }
+                toolStripStatusLabel2.Text = text.Trim();                
             }
         }
 
@@ -177,32 +185,19 @@ namespace JumpToTop
         }
 
         private void SaveAndroidScreenToDisk()
-        {
-            tempFileName = Guid.NewGuid() + ".png";
+        {          
+            ExcuteAdbCmd("shell screencap -p /sdcard/" + picName);
 
-            //DateTime start = DateTime.Now;
+            ExcuteAdbCmd("pull /sdcard/" + picName);
 
-            ExcuteAdbCmd("shell screencap -p /sdcard/" + tempFileName);
+            ExcuteAdbCmd("shell rm /sdcard/" + picName);
 
-            //DateTime end = DateTime.Now;
-
-            //TimeSpan span = end - start;
-            //Console.WriteLine("screencap cost time {0} ms", span.TotalMilliseconds);
-
-            ExcuteAdbCmd("pull /sdcard/"+ tempFileName);
-
-            ExcuteAdbCmd("shell rm /sdcard/" + tempFileName);
-            if (File.Exists(tempFileName))
+            if (File.Exists(picName))
             {
-                using (var temp = Image.FromFile(tempFileName))
+                using (var temp = Image.FromFile(picName))
                 {
                     pictureBox1.Invoke(new Action(() => { pictureBox1.Image = new Bitmap(temp); }));
-                }
-                if (multiplierX == 0)
-                {
-                    multiplierX = pictureBox1.Image.Width / (pictureBox1.Width + 0.00);
-                    multiplierY = pictureBox1.Image.Height / (pictureBox1.Height + 0.00);
-                }
+                }                
             }
         }
 
@@ -241,7 +236,7 @@ namespace JumpToTop
         /// <param name="pPartHeight">目标图片的高度</param>
         /// <param name="pOrigStartPointX">原始图片开始截取处的坐标X值</param>
         /// <param name="pOrigStartPointY">原始图片开始截取处的坐标Y值</param>
-        private Bitmap GetPart(string pPath, int pPartStartPointX, int pPartStartPointY, int pPartWidth, int pPartHeight, int pOrigStartPointX, int pOrigStartPointY)
+        private Bitmap CreatPicturePart(string pPath, int pPartStartPointX, int pPartStartPointY, int pPartWidth, int pPartHeight, int pOrigStartPointX, int pOrigStartPointY)
         {
             Bitmap partImg = new Bitmap(1, 1);
 
@@ -260,23 +255,22 @@ namespace JumpToTop
             return partImg;
         }
 
-        private void InitBrowser()
-        {
-            //从注册表中读取默认浏览器可执行文件路径  
-            var key = Registry.ClassesRoot.OpenSubKey(@"http\shell\open\command\");
-            if (key != null)
+        private void SearchByBrowser(string searchContent)
+        {            
+            if (string.IsNullOrEmpty(searchContent))
             {
-                var s = key.GetValue("").ToString();
-                browserPath = s.Substring(1, s.Length - 9);
+                return;
             }
-        }
 
-        private void Search(string searchContent)
-        {
-
-            //s就是你的默认浏览器，不过后面带了参数，把它截去，不过需要注意的是：不同的浏览器后面的参数不一样！  
-            //"D:\Program Files (x86)\Google\Chrome\Application\chrome.exe" -- "%1"  
-            Process.Start(browserPath, string.Format("http://www.baidu.com/s?wd={0}", searchContent));
+            try
+            {
+                Process.Start(string.Format("http://www.baidu.com/s?wd={0}", searchContent));
+            }
+            catch(Exception ex)
+            {
+                LogHelper.Error("MainForm.Search:"+ex.Message);
+            }
+            
         }
 
         #endregion
