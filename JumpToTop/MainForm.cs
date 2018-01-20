@@ -12,7 +12,7 @@ namespace JumpToTop
     {
         #region private filed
 
-        private const string picName = "65AFC37E-F595-4351-941C-1B1BFF35E2D8.png";
+        private string picName = "";
         private readonly string adbPath = Application.StartupPath + @"\adb\adb.exe";
         private string picDir = Application.StartupPath + "\\temp";
         /// <summary>
@@ -23,15 +23,11 @@ namespace JumpToTop
         ///     是否停止刷新界面
         /// </summary>
         private bool isStop;
-        /// <summary>
-        ///     坐标换算乘数
-        /// </summary>
-        private double multiplierX;
-        private double multiplierY;
+
         /// <summary>
         ///     设备后插入延时执行
         /// </summary>
-        private readonly Timer myTimer = new Timer(100);
+        private readonly Timer myTimer = new Timer(1000);
 
         #endregion
 
@@ -84,6 +80,13 @@ namespace JumpToTop
             }
         }
 
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            ClearTempFiles();
+        }       
+
         #endregion
 
         #region event
@@ -123,11 +126,9 @@ namespace JumpToTop
                 {
                     SearchByBrowser(searchContent);
                 }
-                if (File.Exists(picName))
-                {
-                    File.Delete(picName);
-                }
-                File.Delete(fileName);
+
+                File.Delete(fileName);               
+                
             }
         }
 
@@ -185,7 +186,9 @@ namespace JumpToTop
         }
 
         private void SaveAndroidScreenToDisk()
-        {          
+        {
+            picName = Guid.NewGuid().ToString() + ".png";
+
             ExcuteAdbCmd("shell screencap -p /sdcard/" + picName);
 
             ExcuteAdbCmd("pull /sdcard/" + picName);
@@ -194,10 +197,27 @@ namespace JumpToTop
 
             if (File.Exists(picName))
             {
-                using (var temp = Image.FromFile(picName))
+                Image img = null;
+                using (FileStream stream = File.Open(picName, FileMode.Open))
                 {
-                    pictureBox1.Invoke(new Action(() => { pictureBox1.Image = new Bitmap(temp); }));
-                }                
+                    img = Image.FromStream(stream);
+                    stream.Close();
+                }
+
+                pictureBox1.Image = img;
+
+                //using (var temp = Image.FromFile(picName))
+                //{
+                //    //pictureBox1.Image = null;
+                //    //pictureBox1.Image = new Bitmap(temp);
+                //    pictureBox1.Invoke(new Action(() => 
+                //    {
+                //        pictureBox1.Image = null;
+                //        pictureBox1.Image = (Image)temp.Clone(); 
+                //    }));
+
+                //    temp.Dispose();
+                //}                
             }
         }
 
@@ -271,6 +291,25 @@ namespace JumpToTop
                 LogHelper.Error("MainForm.Search:"+ex.Message);
             }
             
+        }
+
+        private void ClearTempFiles()
+        {
+            var files = Directory.GetFiles(picDir);
+            foreach (var fileName in files)
+            {
+                if (File.Exists(fileName))
+                {
+                    try
+                    {
+                        File.Delete(fileName);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+            }
         }
 
         #endregion
