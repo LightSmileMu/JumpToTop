@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Linq" />
@@ -57,9 +61,10 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="OcrHelper.cs" />
+    <Compile Include="utils\OcrHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="utils\LogHelper.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -73,8 +78,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="adb\mke2fs.conf" />
-    <None Include="adb\source.properties" />
+    <None Include="adb\mke2fs.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="adb\source.properties">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -119,25 +128,44 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="adb\adb.exe" />
-    <Content Include="adb\AdbWinApi.dll" />
-    <Content Include="adb\AdbWinUsbApi.dll" />
-    <Content Include="adb\dmtracedump.exe" />
-    <Content Include="adb\etc1tool.exe" />
-    <Content Include="adb\fastboot.exe" />
-    <Content Include="adb\hprof-conv.exe" />
-    <Content Include="adb\libwinpthread-1.dll" />
-    <Content Include="adb\make_f2fs.exe" />
-    <Content Include="adb\mke2fs.exe" />
-    <Content Include="adb\NOTICE.txt" />
-    <Content Include="adb\sqlite3.exe" />
-    <Content Include="dll\AspriseOCR.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="adb\adb.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="dll\DevIL.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="adb\AdbWinApi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="dll\ILU.dll">
+    <Content Include="adb\AdbWinUsbApi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\dmtracedump.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\etc1tool.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\fastboot.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\hprof-conv.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\libwinpthread-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\make_f2fs.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\mke2fs.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\NOTICE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="adb\sqlite3.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dll\log4net.dll" />
+    <Content Include="log4net.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="x64\liblept172.dll">

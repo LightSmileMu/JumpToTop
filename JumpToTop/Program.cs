@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 namespace JumpToTop
 {
+    [assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.xml", Watch = true)]
     static class Program
     {
         /// <summary>

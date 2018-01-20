@@ -6,6 +6,7 @@ using System.IO;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Timer = System.Timers.Timer;
+using JumpToTop.utils;
 
 namespace JumpToTop
 {
@@ -91,6 +92,8 @@ namespace JumpToTop
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            LogHelper.Debug("123");
+
             DateTime start = DateTime.Now;
 
             SaveAndroidScreenToDisk();
