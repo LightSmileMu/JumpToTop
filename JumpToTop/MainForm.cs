@@ -95,7 +95,10 @@ namespace JumpToTop
         {      
             try
             {
-                DoSearch();
+                if (!backgroundWorker1.IsBusy)
+                {
+                    backgroundWorker1.RunWorkerAsync();
+                }
             }
             catch(Exception ex)
             {
@@ -103,6 +106,10 @@ namespace JumpToTop
             }
         }
 
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            DoSearch();
+        }
 
         #endregion
 
@@ -313,5 +320,7 @@ namespace JumpToTop
         }
 
         #endregion
+
+        
     }
 }
