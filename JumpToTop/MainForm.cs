@@ -91,13 +91,13 @@ namespace JumpToTop
 
         #region event
 
-        private void btnSearch_Click(object sender, EventArgs e)
+        private void btnDoubleLineSearch_Click(object sender, EventArgs e)
         {      
             try
             {
                 if (!backgroundWorker1.IsBusy)
                 {
-                    backgroundWorker1.RunWorkerAsync();
+                    backgroundWorker1.RunWorkerAsync(5f);
                 }
             }
             catch(Exception ex)
@@ -106,20 +106,69 @@ namespace JumpToTop
             }
         }
 
+        private void btnSingleLineSearch_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!backgroundWorker1.IsBusy)
+                {
+                    backgroundWorker1.RunWorkerAsync(4f);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error("MainForm.btnSingleLineSearch_Click:" + ex.Message);
+            }
+        }
+
+        private void btnThreeLineSearch_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!backgroundWorker1.IsBusy)
+                {
+                    backgroundWorker1.RunWorkerAsync(6f);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error("MainForm.btnSingleLineSearch_Click:" + ex.Message);
+            }
+        }
+
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            DoSearch();
+            if(e.Argument is float)
+            {
+                DoSearch((float)e.Argument);
+            }            
         }
 
         #endregion
 
         #region private method
 
-        private void DoSearch()
+        private void DoSearch(float endTitleY)
         {
             SaveAndroidScreenToDisk();
 
-            Bitmap map = CreatPicturePart(picName, 0, 0, 1080, (int)(1920 * (5.5 - 3) / 16.5), 0, (int)(1920 * 3 / 16.5));
+            float picWidthCm = 9.3f;
+            float picHeightCm = 16.5f;
+            float startTitleYCm = 3f;
+            float startTitleXCm = 0.5f;
+
+            int picWidthPix = 1080;
+            int picHeightPix = 1920;
+
+
+
+            Bitmap map = CreatPicturePart(picName,
+                0,
+                0,
+                (int)(picWidthPix * (picWidthCm -2 * startTitleXCm) / picWidthCm),// 两边各空 startTitleXCm
+                (int)(picHeightPix * (endTitleY - startTitleYCm) / picHeightCm),
+                (int)(picWidthPix * startTitleXCm / picWidthCm),
+                (int)(picHeightPix * startTitleYCm / picHeightCm));
 
             string fileName = Path.Combine(Application.StartupPath, "temp", Guid.NewGuid() + ".png");
 
@@ -151,12 +200,16 @@ namespace JumpToTop
                 hasAndroid = false;
                 isStop = true;
                 toolStripStatusLabel2.Text = "未检测到设备";
-                btnSearch.Enabled = false;
+                btnDoubleLineSearch.Enabled = false;
+                btnSingleLineSearch.Enabled = false;
+                btnThreeLineSearch.Enabled = false;
             }
             else
             {
                 hasAndroid = true;
-                btnSearch.Enabled = true;
+                btnDoubleLineSearch.Enabled = true;
+                btnSingleLineSearch.Enabled = true;
+                btnThreeLineSearch.Enabled = true;
                 isStop = false;
                 toolStripStatusLabel2.Text = text.Trim();                
             }
@@ -211,20 +264,7 @@ namespace JumpToTop
                     stream.Close();
                 }
 
-                pictureBox1.Image = img;
-
-                //using (var temp = Image.FromFile(picName))
-                //{
-                //    //pictureBox1.Image = null;
-                //    //pictureBox1.Image = new Bitmap(temp);
-                //    pictureBox1.Invoke(new Action(() => 
-                //    {
-                //        pictureBox1.Image = null;
-                //        pictureBox1.Image = (Image)temp.Clone(); 
-                //    }));
-
-                //    temp.Dispose();
-                //}                
+                pictureBox1.Image = img;               
             }
         }
 
@@ -320,6 +360,8 @@ namespace JumpToTop
         }
 
         #endregion
+
+       
 
         
     }
